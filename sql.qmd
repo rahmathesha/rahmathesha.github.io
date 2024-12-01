@@ -1,0 +1,179 @@
+# Structured query language
+
+::: {.callout-note icon="false"}
+## SQL (es ki el, sequel)
+
+Bahasa standar sistem manajemen basis data relasional untuk melakukan operasi CRUD ( *create*, *read*, *update*, dan *delete*) relasional dan operasi lainnya pada data [@db-hoffer]; [@db-stephens].
+:::
+
+*Structured Query Language* (SQL) adalah bahasa standar yang digunakan untuk mengelola dan memanipulasi data dalam sistem manajemen basis data relasional (RDBMS). Bahasa SQL dalam panduan ini menekankan pada kebutuhan manipulasi data, *data manipulation language* (MDL). Istilah perintah dalam bahasa SQL selanjutnya dikenal dengan **query**.
+
+Penggunaan bahasa SQL pada bagian ini dilakukan dengan memanfaatkan **`R`**. *Package* yang mengakomodasi bahasa SQL diantaranya adalah **`tidyquery`** dan **`sqldf`**. *Package* **`sqldf`** karya @sqldf digunakan dalam panduan ini karena memiliki lebih banyak perintah manipulasi dibandingkan dengan **`tidyquery`** karya @tidyquery.
+
+## Manipulasi data sebuah tabel
+
+### Memilih sebagian data set
+
+Ketika Anda diminta untuk memberikan informasi brand dan berapa banyak yang terjual dari sebuah toko online. Berikut perintah memilih beberapa kolom menggunakan **`sqldf`**.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+pembelian <- read.csv('pembelian.csv', sep = ',')
+pembelian$order_date <- as.POSIXct(pembelian$order_date)
+pembelian$brand <- as.factor(pembelian$brand)
+pembelian$item_price <- as.numeric(pembelian$item_price)
+library(dplyr)
+```
+
+```{r warning=FALSE, message=FALSE}
+library(sqldf)
+man1 <- sqldf("SELECT brand, quantity, item_price FROM pembelian")
+```
+
+```{r echo=FALSE}
+DT::datatable(man1, options = list(pageLength = 5, width = '50%', height = '400px'), caption = 'Tabel 6.1: Tabel dengan kolom brand, quantity dan item price')
+```
+
+<br>
+
+Selanjutnya, untuk memberikan informasi brand apa saja yang penjualannya lebih dari 400 item, maka Anda memilih sebagian baris dari hasil `man1`. Perintah yang digunakan untuk kebutuhan tersebut adalah `where`.
+
+```{r}
+man2 <- sqldf("SELECT * FROM man1 
+               WHERE quantity > 400")
+```
+
+```{r echo=FALSE}
+DT::datatable(man2, options = list(pageLength = 10, width = '50%', height = '400px'), caption = 'Tabel 6.2: Brand dengan penjualan di atas 400 item')
+```
+
+### Mengurutkan objek
+
+Selanjutnya, untuk memberikan informasi brand mana yang paling banyak terjual, maka Anda mengurutkan nilai `quantity` sebagaimana hasil dari `man2`, baik dari yang terbesar ke terkecil *(descending)* maupun sebaliknya *(ascending)*.
+
+```{r}
+man3 <- sqldf("SELECT * FROM man2 
+               ORDER BY quantity DESC") 
+```
+
+```{r echo=FALSE}
+DT::datatable(man3, options = list(pageLength = 10, width = '50%', height = '400px'), caption = 'Tabel 6.3: Urutan brand dengan penjualan di atas 400 item')
+```
+
+### Agregasi
+
+Setelah diurutkan, terlihat dengan jelas bahwa BRAND_P muncul lebih dari sekali. Maka tindakan yang Anda lakukan adalah menjumlahkan `quantity` berdasarkan `brand`. Perintah ini dikenal dengan aggregasi. Hasil aggregasi membuat tampilan `quantity` menjadi tidak terurut sehingga sebaiknya diurutkan kembali untuk mempercepat menangkap informasi.
+
+```{r}
+man4 <- sqldf("SELECT 
+    brand, 
+    SUM(quantity) AS quantity, 
+    SUM(item_price) AS item_price
+FROM 
+    man3
+GROUP BY 
+    brand
+ORDER BY 
+    quantity DESC") 
+```
+
+```{r echo=FALSE}
+DT::datatable(man4, options = list(pageLength = 10, width = '50%', height = '400px'), caption = 'Tabel 6.4: Aggregasi quantity berdasarkan brand yang terjual di atas 400 item')
+```
+
+### Menambah Variabel
+
+Variabel baru dapat dibuat sebagai tambahan informasi pada Tabel 4.4. Tambahan informasi tersebut adalah `total_price` yang merupakan hasil perkalian antara `quantity` dengan `item_price`.
+
+```{r}
+man5 <- sqldf("SELECT *, (quantity * item_price)  AS total_price FROM man4")
+```
+
+```{r echo=FALSE}
+DT::datatable(man5, options = list(pageLength = 10, width = '50%', height = '400px'), caption = 'Tabel 6.5: Penambahan kolom total_price')
+```
+
+## Manipulasi data dua tabel
+
+### Menyatukan tabel
+
+Istilah menyatukan dua tabel, *merge*, ditujukan untuk perintah menyatukan dua tabel dengan ciri kolom yang sama. Sebagai ilustrasi, data set pembelian dibagi menjadi dua bagian. Bagian pertama adalah informasi pembelian selama bulan Oktober dan bagian kedua adalah pembelian bulan November dan Desember. Secara berturut-turut data set pertama dan kedua diberi nama `beli_1` dan `beli_2`.
+
+```{r}
+beli_1 <- pembelian %>% filter(order_date >= "2019-10-1" & order_date < "2019-11-1")
+beli_2 <- pembelian %>% filter(order_date >= "2019-11-1" & order_date <= "2019-12-31")
+```
+
+Kemudian, Anda diminta untuk memberikan informasi pembelian di triwulan terakhir tahun 2019. Tindakan yang Anda lakukan adalah menyatukan data set pertama dan kedua karena memiliki informasi (kolom) yang sama.
+
+```{r}
+beli_3 <- sqldf("SELECT * FROM beli_1
+    UNION ALL
+    SELECT * FROM beli_2")
+```
+
+```{r echo=FALSE}
+DT::datatable(beli_3, options = list(pageLength = 5, width = '50%', height = '400px'), caption = 'Tabel 6.6: Pembelian triwulan IV 2019')
+```
+
+### Menggabung tabel
+
+Menggabung dua tabel, *join*, ditujukan untuk perintah mengombinasikan dua tabel secara horisontal. Penggabungan ini terbagi ke dalam empat jenis: *left join*, *right join*, *inner join*, dan *outer join* seperti pada Gambar [-@fig-join]. Karena penggabungan secara horisontal sehingga digunakan sebuah kolom sebagai penghubung. Kolom tersebut adalah identitas dari masing-masing tabel yaitu `customer_id`.
+
+Sebagai ilustrasi, Anda diminta menggabungkan data set pembelian dengan data set pelanggan, `costumer.csv`.
+
+```{r, echo=FALSE}
+customer <- read.csv('customer.csv', sep = ',')
+pembelian <- read.csv('pembelian.csv', sep = ',')
+```
+
+```{r echo=FALSE}
+DT::datatable(customer, options = list(pageLength = 5, width = '30%', height = '400px'), caption = 'Tabel 6.7: Customer toko online')
+```
+
+#### *Left join*
+
+```{r warning=FALSE}
+ljoin <- sqldf("SELECT * FROM customer LEFT JOIN pembelian
+  ON customer.customer_id = pembelian.customer_id")
+```
+
+```{r echo=FALSE, warning = FALSE}
+DT::datatable(head(ljoin, 10), options = list(pageLength = 5, width = '100%', height = '400px'), caption = 'Tabel 6.8: Tabel hasil left join (10 baris pertama)')
+```
+
+#### *Right join*
+
+```{r warning=FALSE}
+rjoin <- sqldf("SELECT * FROM customer RIGHT JOIN pembelian
+  ON customer.customer_id = pembelian.customer_id")
+```
+
+```{r echo=FALSE, warning=FALSE}
+DT::datatable(head(rjoin, 10), options = list(pageLength = 5, width = '100%', height = '400px'), caption = 'Tabel 6.9: Tabel hasil right join (10 baris pertama)')
+```
+
+#### *Inner join*
+
+```{r warning=FALSE}
+injoin <- sqldf("SELECT * FROM customer INNER JOIN pembelian
+  ON customer.customer_id = pembelian.customer_id")
+```
+
+```{r echo=FALSE, warning=FALSE}
+DT::datatable(head(injoin, 10), options = list(pageLength = 5, width = '100%', height = '400px'), caption = 'Tabel 6.10: Tabel hasil inner join (10 baris pertama)')
+```
+
+#### *Outer join*
+
+```{r warning=FALSE}
+outjoin <- sqldf("SELECT * FROM customer FULL JOIN pembelian
+  ON customer.customer_id = pembelian.customer_id")
+```
+
+```{r echo=FALSE, warning=FALSE}
+DT::datatable(head(outjoin, 10), options = list(pageLength = 5, width = '100%', height = '400px'), caption = 'Tabel 6.11: Tabel hasil outer join (10 baris pertama)')
+```
+
+```{r}
+dim(ljoin); dim(rjoin); dim(injoin); dim(outjoin)
+```

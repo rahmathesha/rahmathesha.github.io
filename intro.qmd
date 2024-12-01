@@ -1,0 +1,52 @@
+# Pengantar
+
+## Pembuatan project
+
+Sebelum memulai menggunakan **`R`** sebaiknya kita membuat *project* sehingga semua file yang digunakan berada dalam sebuah *directory*. Tindakan ini dapat membuat pekerjaan menjadi lebih mudah tanpa harus memperhatikan lokasi file yang akan digunakan, baik file **`.R`** maupun file data set.
+
+Adapun langkah-langkah pembuatan *project* setelah membuka **`R Studio`** adalah sebagai berikut:
+
+1.  Memilih menu `file` kemudian memilih `New Project`.
+
+2.  Memilih pilihan `New Directory` untuk untuk membuat *project* baru bukan yang sudah ada sebelumnya.
+
+3.  Memilih `New Project`.
+
+4.  Menuliskan nama *project*, misal **\[MD\] Labs**, kemudian memilih lokasi penyimpanan *project* dengan menekan pilihan `Browse`, terakhir menekan pilihan `Create Project`.
+
+![Langkah pembuatan *project*](images/project.png){#fig-project fig-align="center" width="1000"}
+
+Setelah membuat *project* sebagaimana diilustrasikan pada Gambar [-@fig-project], maka **`R Studio`** menampilkan lembar kerja seperti pada Gambar [-@fig-project-3].
+
+![Tampilan *project* yang dibuat](images/project-3.png){#fig-project-3 fig-align="center" width="1000"}
+
+## Penyesuaian kelas objek {#suitobjek}
+
+Pengelolaan data terlebih dahulu dimulai dengan menyesuaikan kelas objek dengan kasusnya. Misal:
+
+-   untuk informasi harga satuan barang maka kelasnya bisa berupa `numeric` atau `integer`;
+
+-   untuk informasi brand barang maka kelasnya bisa berupa `character` atau `factor`.
+
+-   untuk informasi tanggal pembelian maka kelasnya bisa berupa `POSIXct`.
+
+::: {.callout-caution icon="false"}
+
+## Ilustrasi
+
+Rekapitulasi data pembelian barang di sebuah toko online pada tahun 2019 disimpan dalam file `pembelian.csv`. Untuk mengelola informasi pembelian tersebut maka terlebih dahulu memeriksa kelas objek dengan menampilkan struktur data.
+:::
+
+```{r}
+raw_data <- read.csv('pembelian.csv', sep = ',')
+str(raw_data)
+```
+
+Berdasarkan struktur dari `raw_data` diketahui bahwa kelas objek dari `order_date` perlu diubah menjadi `POSIXct`. Selain itu, kelas objek `brand` diubah menjadi `factor` dan `item price` diubah menjadi `numeric`. Berikut perintah yang bisa digunakan.
+
+```{r}
+raw_data$order_date <- as.POSIXct(raw_data$order_date)
+raw_data$brand <- as.factor(raw_data$brand)
+raw_data$item_price <- as.numeric(raw_data$item_price)
+str(raw_data)
+```

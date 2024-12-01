@@ -1,0 +1,86 @@
+# Menyambungkan **`R`** dengan BigQuery
+
+Interaksi dengan basis data dilakukan untuk mendapatkan informasi yang dapat digunakan sebagai salah satu dasar penyusunan keputusan bisnis. Oleh karena itu, dalam analitika data, digunakan analisis yang lebih dari analisis deskriptif dan diagnostik. Kondisi tersebut membuat kombinasi basis data dan aplikasi statistik menjadi penting untuk digunakan.
+
+Sistem basis data yang digunakan dalam panduan ini adalah [BigQuery](https://cloud.google.com/bigquery). Kemudian basis data tersebut diakses menggunakan **`R`**. Untuk kebutuhan tersebut, _package_ yang digunakan adalah `bigrquery` karya @bigrquery.  
+
+## Komponen penyambungan **`R`**  dengan BigQuery
+
+Untuk menyambungkan **`R`**  dengan BigQuery dibutuhkan beberapa komponen. Komponen-komponen tersebut adalah: 
+
+- Basis data di BigQuery yang akan diakses 
+
+- BigQuery API sebagai kunci untuk mengakses basis data
+
+- _Package_ **`bigrquery`** untuk mengubungkan  **`R`** dengan BigQuery. 
+
+
+## Tahapan penyambungan **`R`** dengan BigQuery
+
+Setelah semua komponen telah tersedia, maka tahap pertama penyambungan **`R`** dengan BigQuery adalah menjalankan _package_ **`bigrquery`**. Selanjutnya, memberi tahu BigQuery bahwa BigQuery API tersedia dengan menuliskan lokasi file API berada. Di Panduan ini langsung menuliskan nama file API -dalam format `.json`-  karena file tersebut berada dalam _directory_ `project`. 
+
+```{r warning=FALSE}
+library(bigrquery)
+bigrquery::bq_auth(path = "mandat-440801-892ff3e5ddf9.json")
+```
+
+Tahap kedua adalah mengakses basis data. Informasi yang diperlukan adalah nama `project`, nama `dataset` dan `billing`. Nama _project_ yang digunakan adalah **mandat-440801** dan nama _dataset_ adalah **mandat**. Informasi `billing` diisi dengan **My First Project** karena _project_ ini sifatnya bawaan sehingga tidak membutuhkan biaya.
+
+
+```{r results='hide'}
+con <- dbConnect(
+    bigrquery::bigquery(),
+    project = "mandat-440801",
+    dataset = "mandat",
+    billing = "My First Project",
+    use_legacy_sql = TRUE)
+```
+
+Tahap ketiga adalah mencari tahu tabel apa saja yang tersedia di dalam basis data **mandat-440801**. Jika tahapan ini berhasil maka penyambungan **`R`** dengan BigQuery berhasil.
+
+```{r}
+bigrquery::bq_dataset_tables(con)
+```
+
+Tabel yang tersedia di dalam `dataset` **mandat** adalah **mandat-pembelian** dan **mandat-customer**. Selanjutnya, informasi nama variabel penyusun tabel dapat diketahui dengan menjalankan perintah berikut.
+
+```{r}
+dbListFields(con, 'mandat-pembelian')
+```
+
+## Manajemen data
+
+Akses ke tabel yang tersimpan di dalam sebuah sistem basis data telah berhasil. Selanjutnya adalah mengelola data tersebut. Karena data tersebut tersimpan di dalam sebuah basis data maka bahasa yang digunakan adalah bahasa SQL. 
+
+Penggunaan bahasa SQL di dalam **`R`** diakomodasi oleh _package_ **`bigrquery`**. Sedikit berbeda dengan _package_ **`tidyquery`**, _Package_ **`bigrquery`** menyimpan perintah SQL terlebih dahulu kemudian mengekstrak hasil query. Berikut ilustrasi penggunaan bahasa SQL dengan **`bigrquery`** untuk mencari tahu berapa banyak barang yang terjual selama tahun 2019 untuk tiap brand. 
+
+```{r}
+query <- paste("SELECT brand, SUM(quantity) AS sum 
+FROM `mandat-440801.mandat.mandat-pembelian`
+GROUP BY brand
+ORDER BY sum
+DESC")
+```
+
+```{r}
+result <- bq_project_query("mandat-440801", query)
+brand_sum <- bq_table_download(result)
+```
+
+```{r echo=FALSE}
+DT::datatable(brand_sum, options = list(pageLength = 10, width = '30%', height = '400px'), caption = 'Tabel 7.1: Tabel banyaknya barang terjual berdasarkan brand')
+```
+
+## Visualisasi data
+
+Penyampaian informasi dengan grafik atau gambar memiliki keunggulan kecepatan dan kemudahan informasi diserap oleh kebanyakan orang. Tabel banyaknya barang terjual berdasarkan brand di atas dapat disampaikan menggunakan grafik seperti berikut.  
+
+```{r warning=FALSE, message=FALSE}
+library(dplyr); library(ggplot2)
+brand_sum  %>% 
+  ggplot(aes(x= reorder(brand, sum), y= sum)) +
+  geom_bar(stat="identity", fill="#f68060", alpha=.6, width=.4) +
+  coord_flip() +
+  xlab("") +
+  theme_classic()
+```

@@ -1,0 +1,91 @@
+# *Missing Value*
+
+::: callout-note
+## *Missing value*
+
+Data hilang merupakan kondisi dimana nilai dari objek pada kolom tertentu adalah kosong yang ditandai dengan simbol `NA`.
+:::
+
+**Pada kondisi ini**, ada dua hal yang perlu dilakukan. Pertama, memeriksa apakah pada sebuah data set terdapat data yang hilang. Jika ada data yang hilang, maka kedua adalah menangani data hilang tersebut.
+
+## Deteksi data hilang
+
+Misal pada data set pembelian- dengan nama file `missing-value.csv`- berikut, pemeriksaan apakah terdapat *missing value* atau tidak menggunakan **`R`** dapat dilakukan dengan beberapa cara diantaranya adalah:
+
+```{r, results='hide'}
+data <- read.csv('missing-value.csv', sep = ',', na.strings = '')
+(colSums(is.na(data)))
+```
+
+```{r echo=FALSE}
+pander::pander(colSums(is.na(data)))
+```
+
+
+Perhatikan bahwa, pada perintah *import* data, terdapat tambahan perintah `na.strings = ''`. Perintah tersebut digunakan untuk mengakomodasi *missing value* dari nilai objek yang sifatnya kategorik. Jika informasi yang sifatnya kategorik dari sebuah objek ternyata kosong, maka **`R`** akan menerjemahkannya sebagai `NA`.
+
+Berikutnya adalah, mengidentifikasi berapa banyak *missing value* dari data pembelian. Untuk mengetahui hal tersebut, maka perintah yang dapat digunakan adalah `colSums(is.na(data))`.
+
+Sebagaimana ilustrasi di atas, ternyata terdapat missing value pada kolom `brand` yang sifatnya kategorik dan `item price` yang sifatnya numerik.
+
+## Penanganan data hilang
+
+Jika pada data set yang digunakan terdapat data hilang, maka pilihan penanganan yang dapat dilakukan adalah mengeluarkan objek yang memiliki data hilang atau mengganti nilai yang hilang. Untuk melakukan kedua pilihan tersebut, maka dibutuhkan informasi baris dari objek-objek yang memiliki data hilang. Perintah **`R`** yang dapat digunakan untuk tujuan tersebut diantaranya adalah sebagai berikut.
+
+```{r, results='hide'}
+data[!complete.cases(data), ]
+```
+
+```{r echo=FALSE}
+pander::pander(data[!complete.cases(data), ])
+```
+
+Maksud dari perintah di atas adalah mengidentifikasi baris dengan nilai yang kosong pada data set `data`. Hasilnya, diperoleh bahwa pada baris ke-`21` adalah `item price` dan pada baris ke-`1990` informasi yang kosong adalah nama `brand`.
+
+### Mengeluarkan objek
+
+Penanganan data hilang dengan mengeluarkan objek berisi `NA` adalah pilihan yang paling mudah untuk dilakukan. Akan tetapi, pilihan ini sebaiknya dilakukan jika hanya **sedikit** data hilang. Karena jika sebaliknya, maka banyak objek yang dikeluarkan dan banyak pula informasi yang hilang.
+
+Karena hanya dua objek yang memuat nilai kosong, maka kedua objek tersebut akan dikeluarkan. Perintah **`R`** yang dapat dilakukan diantaranya adalah sebagai berikut:
+
+```{r, results='hide'}
+drop_na <- data[-c(21, 1990),]
+colSums(is.na(drop_na))
+```
+```{r echo=FALSE}
+pander::pander(colSums(is.na(drop_na)))
+```
+
+Setelah data hilang dikeluarkan maka sebaiknya diperiksa kembali apakah data hilang tersebut berhasil dikeluarkan dengan menggunakan perintah sebagaimana memeriksa data hilang sebelumnya.
+
+### Mengganti nilai objek yang hilang
+
+Pilihan penanganan data hilang berikutnya adalah mengganti nilai yang bernilai `NA`. Nama lain dari penangan ini adalah **imputasi**. Hal yang perlu diperhatikan adalah penggantian nilai ini bisa berdasarkan dari informasi ahli atau berdasarkan dengan statistik data. Pada panduan ini, imputasi dilakukan berdasarkan statistik data dengan menggunakan nilai modus untuk nilai yang sifatnya kategorik dan nilai median untuk nilai yang sifatnya numerik.
+
+Untuk mendapatkan modus dari `brand`, maka penggunaan tabel frekuensi adalah alat bantu yang tepat dan mudah sebagaimana yang disajikan pada tabel di berikut.
+
+```{r}
+table(data$brand)
+```
+
+Oleh karena itu, informasi `brand` yang kosong pada baris ke-`1990` diisi dengan `BRAND_S`. Selanjutnya, periksa kembali apakah perintah berhasil atau tidak.
+
+```{r, results='hide'}
+data$brand[is.na(data$brand)] <- 'BRAND_S'
+```
+
+```{r echo=FALSE}
+data$brand[is.na(data$brand)] <- 'BRAND_S'
+pander::pander(data[1990,])
+```
+
+Berikutnya, untuk mengganti nilai `item_price` yang kosong pada baris ke-`21` dapat dilakukan dengan **`R`** diantaranya menggunakan perintah sebagai berikut.
+
+```{r, results='hide'}
+data$item_price[is.na(data$item_price)] <- mean(data$item_price, na.rm = TRUE)
+```
+
+```{r echo=FALSE}
+data$item_price[is.na(data$item_price)] <- mean(data$item_price, na.rm = TRUE)
+pander::pander(data[21,])
+```

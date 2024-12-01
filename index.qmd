@@ -1,0 +1,15 @@
+### Kata Pengantar {.unnumbered}
+
+Panduan praktikum manajemen data ini disusun menjadi tiga bagian. **Bagian 1** adalah persiapan pengelolaan data menggunakan **`R`**. Bagian ini dimulai dengan membuat **`project`** di **`R Studio`**. Tujuannya adalah untuk membangun kebiasaan bekerja di dalam sebuah kerangka sehingga baik file **`.R`** dan data set **`.csv`** tidak berpencar di *directory* yang berbeda.
+
+**Bagian 2** adalah pengelolaan data dengan bahasa dasar **`R`**. Yaitu, memanfaatkan perintah bawaan yang telah disediakan **`R`**. Selain itu, dalam panduan ini juga menggunakan tata bahasa elegan yang ditawarkan oleh **`R`** menggunakan **`dplyr`** karya fenomenal @dplyr.
+
+**Bagian 3** memperkenalkan pembuatan basis data menggunakan [BigQuery](https://cloud.google.com/bigquery). Pengelolaan basis data menggunakan bahasa ***structured query language (`SQL`)***. Untuk kebutuhan analisis data, maka **`R`** disambungkan dengan basis data.
+
+Akhirnya, panduan ini merupakan sebagai sumber belajar yang tidak lepas dari berbagai kekurangan. Maka penulis menerima kritik dan saran membangun untuk mengoptimalkan panduan ini. Terima kasih kepada [Posit PBC](https://posit.co/about/) yang telah membuat layanan [Quarto book](https://quarto.org/docs/books) sehingga membantu penyelesaian penyusunan panduan ini.  
+
+Terima kasih kepada Mentor Dr. Ruliana, S.Pd., M.Si. dan Coach Suhanda, S.Pd., M.A. yang telah memberikan bimbingan dalam penyusunan panduan praktikum ini. Terima kasih kepada Tim penggampu mata kuliah Manajemen Data, Ansari Saleh Ahmar, Ph.D., Zakiyah Mar'ah, M.Si. dan Hardianti Hafid, M.Si. yang meluangkan waktu mendiskusikan penyusunan panduan praktikum ini.  Serta kepada seluruh dosen dan admin Prodi Statistika yang telah memberikan bantuannya selama aktualisasi Latsar.
+
+> **Semoga panduan ini bermanfaat**
+
+

@@ -1,0 +1,177 @@
+# Manipulasi Data I {#sec-base}
+
+::: {.callout-note icon="false"}
+
+## Manipulasi data
+Proses memodifikasi, menyusun, dan mengelola data guna mendapatkan informasi yang berguna, membersihkan data dari ketidakcocokan atau nilai yang hilang, serta mempersiapkan data untuk analisis lebih mendalam.
+:::
+
+Manipulasi data di bagian ini menekankan pada penggunaan bahasa dasar **`R`** untuk mengelola data set. Data set yang dimaksud adalah berupa `data frame` yang tersusun atas baris dan kolom. Pengelolaan data terdiri dari manipulasi satu dan lebih dari satu `data frame`.
+
+Perintah manipulasi data sebuah `data frame` antara lain: memilih sebagian variabel (kolom), memilih sebagian objek (baris) dan mengurutkan data set berdasarkan nilai variabel tertentu. Kemudian, perintah manipulasi data lebih dari satu `data frame` antara lain: menyatukan _(merge)_ dua tabel dengan ciri kolom yang sama dan menggabungkan _(join)_ dua tabel.
+
+## Manipulasi data sebuah tabel
+### Memilih sebagian data set
+
+Memilih sebagian kolom dilakukan ketika hanya sebagian informasi yang dibutuhkan dari sebuah `data frame`. Misal, Anda diminta untuk memberikan informasi brand dan berapa banyak yang terjual dari sebuah toko online.  
+
+```{r echo=FALSE}
+pembelian <- read.csv('pembelian.csv', sep = ',')
+pembelian$order_date <- as.POSIXct(pembelian$order_date)
+pembelian$brand <- as.factor(pembelian$brand)
+pembelian$item_price <- as.numeric(pembelian$item_price)
+```
+
+```{r}
+man_1 <- pembelian[which(names(pembelian) == c("brand", "quantity", "item_price"))]
+```
+
+```{r echo=FALSE}
+DT::datatable(man_1, options = list(pageLength = 5, width = '50%', height = '400px'), caption = 'Tabel 3.1: Tabel dengan kolom brand, quantity dan item price')
+```
+
+<br>
+
+Selanjutnya, Anda diminta untuk memberikan informasi brand apa saja yang penjualannya lebih dari 400 item. Maka tindakan yang Anda lakukan adalah memilih sebagian baris dari hasil `man_1`.
+
+
+```{r}
+man_2 <- man_1[which(man_1$quantity > 400),]
+```
+
+```{r echo=FALSE}
+DT::datatable(man_2, options = list(pageLength = 10, width = '50%', height = '400px'), caption = 'Tabel 3.2: Brand dengan penjualan di atas 400 item')
+```
+
+
+### Mengurutkan objek
+Selanjutnya, Anda diminta untuk memberikan informasi brand mana yang paling banyak terjual. Maka tindakan yang Anda lakukan adalah mengurutkan nilai `quantity` sebagaimana hasil dari `man_2`, baik dari yang terbesar ke terkecil maupun sebaliknya.
+
+```{r}
+man_3 <- man_2[order(man_2$quantity, decreasing = TRUE),]
+```
+
+```{r echo=FALSE}
+DT::datatable(man_3, options = list(pageLength = 10, width = '50%', height = '400px'), caption = 'Tabel 3.3: Urutan brand dengan penjualan di atas 400 item')
+```
+
+### Aggregasi
+
+Setelah diurutkan, terlihat dengan jelas bahwa BRAND_P muncul lebih dari sekali. Maka tindakan yang Anda lakukan adalah menjumlahkan `quantity` berdasarkan `brand`. Perintah ini dikenal dengan aggregasi. Hasil aggregasi membuat tampilan `quantity` menjadi tidak terurut sehingga sebaiknya diurutkan kembali untuk mempercepat menangkap informasi.  
+
+::: {.callout-note icon="false"}
+### Aggregasi
+
+Proses merangkum data untuk menghasilkan informasi yang lebih ringkas dan terstruktur, rangkuman dapat berupa total, rata-rata, median, dan simpangan baku.
+:::
+
+```{r}
+man_4 <- aggregate(cbind(quantity, item_price) ~ brand, data = man_3, FUN=sum)
+```
+
+```{r echo=FALSE}
+DT::datatable(man_4[order(man_4$quantity, decreasing = TRUE),], options = list(pageLength = 10, width = '50%', height = '400px'), caption = 'Tabel 3.4: Aggregasi quantity berdasarkan brand yang terjual di atas 400 item')
+```
+
+### Menambah Variabel
+Dari informasi urutan brand yang banyak terjual pada `man_3`, Anda diminta untuk membarikan informasi total penjualan. Maka tindakan yang Anda ambil adalah membuat kolom baru. Kolom baru tersebut adalah hasil perkalian antara `quantity` dengan `item_price`, yang selanjutnya diberi nama `total_price`. 
+
+```{r}
+man_4$total_price <- man_4$quantity * man_4$item_price
+```
+
+```{r echo=FALSE}
+DT::datatable(man_4[order(man_4$quantity, decreasing= TRUE),], options = list(pageLength = 10, width = '50%', height = '400px'), caption = 'Tabel 3.5: Penambahan kolom total_price')
+```
+
+## Manipulasi data dua tabel
+### Menyatukan tabel
+
+Istilah menyatukan dua tabel, _merge_, ditujukan untuk perintah menyatukan dua tabel dengan ciri kolom yang sama secara vertikal. Sebagai ilustrasi, data set pembelian dibagi menjadi dua bagian. Bagian pertama adalah informasi pembelian selama bulan Oktober dan bagian kedua adalah pembelian bulan November dan Desember. Secara berturut-turut data set pertama dan kedua diberi nama `beli_1` dan `beli_2`.
+
+```{r}
+beli_1 <- pembelian[pembelian$order_date >= "2019-10-1" & pembelian$order_date < "2019-11-1",]
+beli_2 <- pembelian[pembelian$order_date >= "2019-11-1" & pembelian$order_date <= "2019-12-31",]
+```
+
+
+```{r echo=FALSE}
+DT::datatable(beli_1, options = list(pageLength = 5, width = '50%', height = '400px'), caption = 'Tabel 3.6: Pembelian di bulan Oktober')
+```
+<br>
+
+```{r echo=FALSE}
+DT::datatable(beli_2, options = list(pageLength = 5, width = '50%', height = '400px'), caption = 'Tabel 3.7: Pembelian di bulan Nopember dan Desember')
+```
+<br>
+
+Misal, Anda diminta untuk memberikan informasi pembelian di triwulan terakhir tahun 2019. Tindakan yang Anda lakukan adalah menyatukan data set pertama dan kedua karena memiliki informasi (kolom) yang sama. 
+
+
+```{r}
+beli_3 <- rbind(beli_1, beli_2)
+```
+
+
+```{r echo=FALSE}
+DT::datatable(beli_3, options = list(pageLength = 5, width = '50%', height = '400px'), caption = 'Tabel 3.8: Pembelian triwulan IV 2019')
+```
+
+### Menggabung tabel
+
+Menggabung dua tabel, _join_, ditujukan untuk perintah menyatukan dua tabel dengan ciri kolom yang tidak harus sama secara horisontal. Penggabungan ini terbagi ke dalam empat jenis: _left join_, _right join_, _inner join_, dan _outer join_ seperti pada Gambar [-@fig-join]. 
+
+Sebagai ilustrasi, Anda diminta menggabungkan data set pembelian dengan data set pelanggan, `costumer.csv`. 
+
+![Jenis penggabungan tabel](images/join Venn.png){#fig-join fig-align="center" width="500"}
+
+```{r}
+customer <- read.csv('customer.csv', sep = ',')
+```
+
+<br>
+```{r echo=FALSE}
+DT::datatable(customer, options = list(pageLength = 5, width = '50%', height = '400px'), caption = 'Tabel 3.9: Customer toko online')
+```
+
+#### _Left join_
+```{r warning=FALSE}
+left_j <- merge(customer, pembelian, all.x = TRUE)
+```
+
+```{r echo=FALSE, warning = FALSE}
+DT::datatable(head(left_j, 10), options = list(pageLength = 5, width = '100%', height = '400px'), caption = 'Tabel 3.10: Tabel hasil left join (10 baris pertama)')
+```
+
+#### _Right join_
+```{r warning=FALSE}
+right_j <- merge(customer, pembelian, all.y = TRUE)
+```
+
+```{r echo=FALSE, warning=FALSE}
+DT::datatable(head(right_j, 10), options = list(pageLength = 5, width = '100%', height = '400px'), caption = 'Tabel 3.11: Tabel hasil right join (10 baris pertama)')
+```
+
+#### _Inner join_
+```{r warning=FALSE}
+inner_j <- merge(customer, pembelian)
+```
+
+```{r echo=FALSE, warning=FALSE}
+DT::datatable(head(inner_j, 10), options = list(pageLength = 5, width = '100%', height = '400px'), caption = 'Tabel 3.12: Tabel hasil inner join (10 baris pertama)')
+```
+
+#### _Outer join_
+```{r warning=FALSE}
+outer_j <- merge(customer, pembelian, all.x = TRUE, all.y = TRUE)
+```
+
+```{r echo=FALSE, warning=FALSE}
+DT::datatable(head(outer_j, 10), options = list(pageLength = 5, width = '100%', height = '400px'), caption = 'Tabel 3.13: Tabel hasil outer join (10 baris pertama)')
+```
+
+<br>
+```{r}
+dim(left_j); dim(right_j); dim(inner_j); dim(outer_j)
+```
+

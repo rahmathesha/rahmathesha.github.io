@@ -1,0 +1,29 @@
+project:
+  type: book
+
+book:
+  cover-image: images/pro1.png
+  title: "Panduan Praktikum Manajemen Data"
+  author: "Rahmat H. S."
+  date: "11/30/2024"
+  chapters:
+    - index.qmd
+    - intro.qmd
+    - missing-value.qmd
+    - md-base.qmd
+    - md-fancy.qmd
+    - konsep-basis-data.qmd
+    - sql.qmd
+    - bqR.qmd
+    - references.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme: cosmo
+  pdf:
+    documentclass: scrreprt
+
+editor: source
+

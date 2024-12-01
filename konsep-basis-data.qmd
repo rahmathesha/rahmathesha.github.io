@@ -1,0 +1,126 @@
+# Pengantar Basis Data
+
+## Konsep dasar
+
+::: {.callout-note icon="false"}
+## Basis data
+Alat yang dapat menyimpan sekumpulan data dan memungkinkan untuk membuat, membaca, memperbarui, dan menghapus data dengan cara tertentu [@db-stephens].
+:::
+
+Kumpulan data yang saling berhubungan yang disimpan secara bersama sedemikian rupa tanpa pengulangan *(redundancy)* yang tidak perlu, untuk memenuhi berbagai kebutuhan.
+
+Beberapa tujuan dari basis data adalah:
+
+-   ***Security and protection***, pencegahan akses terhadap pengguna yang tidak terdaftar (sah);
+
+-   ***Facilitation of multiple users***, memungkinkan pengguna dalam jumlah yang besar;
+
+-   ***Ease of data access and data change***, kemudahan akses dan perubahan data;
+
+-   ***Clarity***, data disimpan dengan bahasa baku sehingga tidak membingungkan pengguna
+
+-   ***Availability***, data dapat diakses kapanpun.
+
+Basis data digunakan jika:
+
+-   Ukuran data besar
+
+-   Data perlu diperbarui
+
+-   Data relevan untuk jangka waktu yang cukup lama
+
+-   Data digunakan secara bersamaan oleh banyak pengguna
+
+## Sistem dan model basis data
+
+::: {.callout-note icon="false"}
+## Sistem basis data
+Kumpulan dari program aplikasi yang mengelola (berinteraksi dengan) basis data disebut *Database Management System* (DBMS) [@db-hoffer] 
+:::
+
+Untuk mengelola basis data dibutuhkan beberapa komponen antara lain [@db-foster]:
+
+-   **Hardware** : Komputer, laptop, server, dan lain-lain
+
+-   **Sistem operasi** : Windows, Linux, MacOS
+
+-   **Database** : data yang disimpan
+
+-   **Aplikasi** : MySQL, PostgreSQL, SQL Server, ***bigquery***
+
+-   **User** : Admin, klien
+
+-   **Aplikasi lain** : Web browser
+
+Penggunaan komponen-komponen di atas diilustrasikan pada @fig-db-konsep.
+
+![Pendekatan basis data untuk manajemen data](images/data-based.png){#fig-db-konsep fig-align="center" width="700"}
+
+::: {.callout-note icon="false"}
+## Model basis data
+Kumpulan konseptual untuk menggambarkan data, hubungan data dan batasan data
+:::
+
+Model basis data yang diperkenalkan dalam panduan ini adalah ***entity relationship diagram (ERD)***. Model ini tersusun atas beberapa komponen sebagai berikut:
+
+-   ***Entity***, objek (entitas) yang dikumpulkan informasinya seperti: mahasiswa, mata kuliah, pembeli, barang, dan sebagainya.
+
+-   ***Attribute***, informasi yang menjelaskan entitas.
+
+    -   ***primary key***, atribut yang digunakan sebagai identitas dari sebuah *entity*
+
+    -   ***foreign key***, atribut yang digunakan untuk melihat *(lookup)* ke *entity* pemilik relasi tersebut
+
+-   ***Relationship***, hubungan antar entitas.
+
+-   ***Cardinality***, jumlah entitas yang dapat berelasi dengan entitas yang lain, seperti: **1-to-1**, **1-to-N**, **N-to-1** dan **N-to-N**.
+
+![Ilustrasi relasi mahasiswa dengan matakuliah](images/erd-fk-n-n.png){#fig-erd-fk-nn fig-align="center" width="700"}
+
+Ilustrasi pada @fig-erd-fk-nn di atas menunjukkan:
+
+-   ***Entity***, mahasiswa dan matakuliah.
+
+-   ***Attribute***,
+
+    -   *mahasiswa* terdiri dari `NIM` sebagai `primary key`, nama, alamat, dan semester.
+
+    -   *matakuliah*, terdiri dari `kode` sebagai `primary key` dan nama.
+
+    -   *foreign key*, terdiri dari `NIM` dan `kode`.
+
+-   ***Relationship***, hubungannya berupa mahasiswa memilih matakuliah.
+
+-   ***Cardinality***, **N-to-N**, banyak mahasiswa memilih banyak matakuliah
+
+## Pembuatan basis data
+
+::: callout-note
+## bigquery
+
+Platform analisis data berbasis cloud yang dikembangkan oleh Google yang dirancang untuk mengolah dataset besar dengan kecepatan dan efisiensi tinggi
+:::
+
+Aplikasi yang digunakan untuk membuat basis data adalah bigquery karena dapat digunakan dengan menggunakan akun Google. Berikut langkah-langkah pembuatan basis data di bigquery.
+
+-   mengunjungi laman [Console Google Cloud](https://console.cloud.google.com/) selanjutnya akan muncul kotak dialog sebagaimana pada @fig-bq-1 kemudian memilih layanan bigquery.
+
+![Laman awal console Google Cloude](images/bq-1.png){#fig-bq-1 fig-align="center" width="700"}
+
+-   Membuat projek (basis data) seperti pada @fig-bq-2.
+
+    1.  membuat basis data baru
+
+    2.  memberi nama basis data dengan **manajemen-data**
+
+    3.  menyelesaikan pembuatan basis data
+
+![Membuat basis data](images/bq-3.png){#fig-bq-2 fig-align="center" width="700"}
+
+-   membuat tabel atau mengisi basis data dengan menggunakan data set yang sudah ada, `pembelian.csv` sebagaimana pada seperti @fig-bq-3.
+
+![Membuat tabel](images/bq-5.png){#fig-bq-3 fig-align="center" width="700"}
+
+-   mengakses tabel **`pembelian`** di dalam **schema** (dataset) **`mandat`** pada basis data **`manajemen-data`** yang diilustrasikan pada @fig-bq-4.
+
+![Mengakses basis data](images/bq-6.png){#fig-bq-4 fig-align="center" width="700"}
